@@ -1,57 +1,61 @@
-" Maps <C-h/j/k/l> to switch vim splits in the given direction. If there are
-" no more windows in that direction, forwards the operation to tmux.
-" Additionally, <C-\> toggles between last active vim splits/tmux panes.
+" Maps <C-Left/Down/Up/Right> to resize vim splits in the given direction.
+" If the pane is right- or bottom-most, forwards the command to tmux
 
-if exists("g:loaded_tmux_navigator") || &cp || v:version < 700
+if exists("g:loaded_tmux_resizer") || &cp || !has('patch-8.1.1140')
   finish
 endif
-let g:loaded_tmux_navigator = 1
+let g:loaded_tmux_resizer = 1
 
-function! s:VimNavigate(direction)
-  try
-    execute 'wincmd ' . a:direction
-  catch
-    echohl ErrorMsg | echo 'E11: Invalid in command-line window; <CR> executes, CTRL-C quits: wincmd k' | echohl None
-  endtry
+function! s:VimResize(direction)
+  if a:direction == 'l'
+    if winnr('l') == winnr()
+      execute 'vertical resize -5'
+    else
+      execute 'vertical resize +5'
+    endif
+  elseif a:direction == 'h'
+    if winnr('l') == winnr()
+      execute 'vertical resize +5'
+    else
+      execute 'vertical resize -5'
+    endif
+  elseif a:direction == 'j'
+    if winnr('j') == winnr()
+      execute 'resize -5'
+    else
+      execute 'resize +5'
+    endif
+  elseif a:direction == 'k'
+    if winnr('j') == winnr()
+      execute 'resize +5'
+    else
+      execute 'resize -5'
+    endif
+  endif
 endfunction
 
-if !get(g:, 'tmux_navigator_no_mappings', 0)
-  nnoremap <silent> <c-h> :TmuxNavigateLeft<cr>
-  nnoremap <silent> <c-j> :TmuxNavigateDown<cr>
-  nnoremap <silent> <c-k> :TmuxNavigateUp<cr>
-  nnoremap <silent> <c-l> :TmuxNavigateRight<cr>
-  nnoremap <silent> <c-\> :TmuxNavigatePrevious<cr>
+if !get(g:, 'tmux_resizer_no_mappings', 0)
+  nnoremap <silent> <c-Left> :TmuxResizeLeft<cr>
+  nnoremap <silent> <c-Down> :TmuxResizeDown<cr>
+  nnoremap <silent> <c-Up> :TmuxResizeUp<cr>
+  nnoremap <silent> <c-Right> :TmuxResizeRight<cr>
 endif
 
 if empty($TMUX)
-  command! TmuxNavigateLeft call s:VimNavigate('h')
-  command! TmuxNavigateDown call s:VimNavigate('j')
-  command! TmuxNavigateUp call s:VimNavigate('k')
-  command! TmuxNavigateRight call s:VimNavigate('l')
-  command! TmuxNavigatePrevious call s:VimNavigate('p')
+  command! TmuxResizeLeft call s:VimResize('h')
+  command! TmuxResizeDown call s:VimResize('j')
+  command! TmuxResizeUp call s:VimResize('k')
+  command! TmuxResizeRight call s:VimResize('l')
   finish
 endif
 
-command! TmuxNavigateLeft call s:TmuxAwareNavigate('h')
-command! TmuxNavigateDown call s:TmuxAwareNavigate('j')
-command! TmuxNavigateUp call s:TmuxAwareNavigate('k')
-command! TmuxNavigateRight call s:TmuxAwareNavigate('l')
-command! TmuxNavigatePrevious call s:TmuxAwareNavigate('p')
-
-if !exists("g:tmux_navigator_save_on_switch")
-  let g:tmux_navigator_save_on_switch = 0
-endif
-
-if !exists("g:tmux_navigator_disable_when_zoomed")
-  let g:tmux_navigator_disable_when_zoomed = 0
-endif
+command! TmuxResizeLeft call s:TmuxAwareResize('h')
+command! TmuxResizeDown call s:TmuxAwareResize('j')
+command! TmuxResizeUp call s:TmuxAwareResize('k')
+command! TmuxResizeRight call s:TmuxAwareResize('l')
 
 function! s:TmuxOrTmateExecutable()
   return (match($TMUX, 'tmate') != -1 ? 'tmate' : 'tmux')
-endfunction
-
-function! s:TmuxVimPaneIsZoomed()
-  return s:TmuxCommand("display-message -p '#{window_zoomed_flag}'") == 1
 endfunction
 
 function! s:TmuxSocket()
@@ -68,57 +72,30 @@ function! s:TmuxCommand(args)
   return retval
 endfunction
 
-function! s:TmuxNavigatorProcessList()
+function! s:TmuxresizerProcessList()
   echo s:TmuxCommand("run-shell 'ps -o state= -o comm= -t ''''#{pane_tty}'''''")
 endfunction
-command! TmuxNavigatorProcessList call s:TmuxNavigatorProcessList()
-
-let s:tmux_is_last_pane = 0
-augroup tmux_navigator
-  au!
-  autocmd WinEnter * let s:tmux_is_last_pane = 0
-augroup END
+command! TmuxresizerProcessList call s:TmuxresizerProcessList()
 
 function! s:NeedsVitalityRedraw()
   return exists('g:loaded_vitality') && v:version < 704 && !has("patch481")
 endfunction
 
-function! s:ShouldForwardNavigationBackToTmux(tmux_last_pane, at_tab_page_edge)
-  if g:tmux_navigator_disable_when_zoomed && s:TmuxVimPaneIsZoomed()
-    return 0
+function! s:TmuxAwareResize(direction)
+  let l:vim = 1
+  if (a:direction == 'l' || a:direction == 'h') && winnr('l') == winnr()
+    let l:vim = 0
+  elseif (a:direction == 'j' || a:direction == 'k') && winnr('j') == winnr()
+    let l:vim = 0
   endif
-  return a:tmux_last_pane || a:at_tab_page_edge
-endfunction
-
-function! s:TmuxAwareNavigate(direction)
-  let nr = winnr()
-  let tmux_last_pane = (a:direction == 'p' && s:tmux_is_last_pane)
-  if !tmux_last_pane
-    call s:VimNavigate(a:direction)
-  endif
-  let at_tab_page_edge = (nr == winnr())
-  " Forward the switch panes command to tmux if:
-  " a) we're toggling between the last tmux pane;
-  " b) we tried switching windows in vim but it didn't have effect.
-  if s:ShouldForwardNavigationBackToTmux(tmux_last_pane, at_tab_page_edge)
-    if g:tmux_navigator_save_on_switch == 1
-      try
-        update " save the active buffer. See :help update
-      catch /^Vim\%((\a\+)\)\=:E32/ " catches the no file name error
-      endtry
-    elseif g:tmux_navigator_save_on_switch == 2
-      try
-        wall " save all the buffers. See :help wall
-      catch /^Vim\%((\a\+)\)\=:E141/ " catches the no file name error
-      endtry
-    endif
-    let args = 'select-pane -t ' . shellescape($TMUX_PANE) . ' -' . tr(a:direction, 'phjkl', 'lLDUR')
+  " TODO: would be nice to detect when vim is an edge pane and resize internally
+  if l:vim
+    call s:VimResize(a:direction)
+  else
+    let args = 'resize-pane -' . tr(a:direction, 'hjkl', 'LDUR') . ' 5'
     silent call s:TmuxCommand(args)
     if s:NeedsVitalityRedraw()
       redraw!
     endif
-    let s:tmux_is_last_pane = 1
-  else
-    let s:tmux_is_last_pane = 0
   endif
 endfunction

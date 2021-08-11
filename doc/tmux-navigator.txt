@@ -1,36 +1,28 @@
-*tmux-navigator.txt* Plugin to allow seamless navigation between tmux and vim
+*tmux-resizer.txt* Plugin to allow seamless resizing between tmux and vim
 
 ==============================================================================
-CONTENTS                               *tmux-navigator-contents*
+CONTENTS                               *tmux-resizer-contents*
 
 
 ==============================================================================
-INTRODUCTION                           *tmux-navigator*
+INTRODUCTION                           *tmux-resizer*
 
-Vim-tmux-navigator is a little plugin which enables seamless navigation
-between tmux panes and vim splits. This plugin is a repackaging of Mislav
-Marohinc's tmux=navigator configuration. When combined with a set of tmux key
-bindings, the plugin will allow you to navigate seamlessly between vim and
-tmux splits using a consistent set of hotkeys.
+This plugin is a re-fork-magining of Chris Toomey's vim-tmux-navigator. 
+When combined with a set of tmux key bindings, the plugin will allow you
+to resize seamlessly between vim and tmux splits using a consistent set of
+hotkeys.
 
-NOTE: This requires tmux v1.8 or higher.
+NOTE: This requires tmux v1.8 or higher and vim 8.1.1104 or higher.
 
 ==============================================================================
-CONFIGURATION                             *tmux-navigator-configuration*
-
-* Activate autoupdate on exit
- let g:tmux_navigator_save_on_switch = 1
-
-* Disable vim->tmux navigation when the Vim pane is zoomed in tmux
- let g:tmux_navigator_disable_when_zoomed = 1
+CONFIGURATION                             *tmux-resizer-configuration*
 
 * Custom Key Bindings
- let g:tmux_navigator_no_mappings = 1
+ let g:tmux_resizer_no_mappings = 1
 
- nnoremap <silent> {Left-mapping} :TmuxNavigateLeft<cr>
- nnoremap <silent> {Down-Mapping} :TmuxNavigateDown<cr>
- nnoremap <silent> {Up-Mapping} :TmuxNavigateUp<cr>
- nnoremap <silent> {Right-Mapping} :TmuxNavigateRight<cr>
- nnoremap <silent> {Previous-Mapping} :TmuxNavigatePrevious<cr>
+ nnoremap <silent> {Left-mapping} :TmuxResizerLeft<cr>
+ nnoremap <silent> {Down-Mapping} :TmuxResizerDown<cr>
+ nnoremap <silent> {Up-Mapping} :TmuxResizerUp<cr>
+ nnoremap <silent> {Right-Mapping} :TmuxResizerRight<cr>
 
  vim:tw=78:ts=8:ft=help:norl:
