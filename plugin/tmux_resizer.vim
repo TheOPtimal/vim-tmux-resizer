@@ -35,10 +35,10 @@ function! s:VimResize(direction)
 endfunction
 
 if !get(g:, 'tmux_resizer_no_mappings', 0)
-  nnoremap <silent> <c-Left> :TmuxResizeLeft<cr>
-  nnoremap <silent> <c-Down> :TmuxResizeDown<cr>
-  nnoremap <silent> <c-Up> :TmuxResizeUp<cr>
-  nnoremap <silent> <c-Right> :TmuxResizeRight<cr>
+  nnoremap <silent> <m-Left> :TmuxResizeLeft<cr>
+  nnoremap <silent> <m-Down> :TmuxResizeDown<cr>
+  nnoremap <silent> <m-Up> :TmuxResizeUp<cr>
+  nnoremap <silent> <m-Right> :TmuxResizeRight<cr>
 endif
 
 if empty($TMUX)
