@@ -11,7 +11,6 @@ Usage
 This plugin provides the following mappings which allow you to resize between
 Vim panes and tmux splits seamlessly.
 
-
 - `<alt-left>` => Resize right-most pane border left
 - `<alt-down>` => Resize lowest pane border down
 - `<alt-up>` => Resize lowest pane border up
