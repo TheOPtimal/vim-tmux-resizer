@@ -11,10 +11,11 @@ Usage
 This plugin provides the following mappings which allow you to resize between
 Vim panes and tmux splits seamlessly.
 
-- `<ctrl-left>` => Resize right-most pane border left
-- `<ctrl-down>` => Resize lowest pane border down
-- `<ctrl-up>` => Resize lowest pane border up
-- `<ctrl-right>` => Resize right-most border right
+
+- `<alt-left>` => Resize right-most pane border left
+- `<alt-down>` => Resize lowest pane border down
+- `<alt-up>` => Resize lowest pane border up
+- `<alt-right>` => Resize right-most border right
 
 **Note** - you don't need to use your tmux `prefix` key sequence before using
 the mappings.
@@ -98,8 +99,8 @@ nnoremap <silent> {Right-Mapping} :TmuxResizeRight<cr>
 ```
 
 *Note* Each instance of `{Left-Mapping}` or `{Down-Mapping}` must be replaced
-in the above code with the desired mapping. Ie, the mapping for `<ctrl-Left>` =>
-Left would be created with `nnoremap <silent> <c-Left> :TmuxResizeLeft<cr>`.
+in the above code with the desired mapping. Ie, the mapping for `<Alt-Left>` =>
+Left would be created with `nnoremap <silent> <m-Left> :TmuxResizeLeft<cr>`.
 
 #### Tmux
 
@@ -122,13 +123,13 @@ You'll likely need to tell it how for your terminal emulator. Thanks to [this ha
 way forward is to get in insert mode and press ctrl-v ctrl-<arrow> once for each
 of up, down, left, and right and create a vim mapping for each output. Make sure you're holding ctrl for the arrows too.
 
-If you get `^[1;5A` for up, like I did, you can map it with `map <ESC>[1;5A <C-Up>` in your vimrc. The important note here is that `^` is `<ESC>` and everyting else is usually literal. For reference in Konsole, my mappings are:
+If you get `^[1;5A` for up, like I did, you can map it with `map <ESC>[1;5A <M-Up>` in your vimrc. The important note here is that `^` is `<ESC>` and everyting else is usually literal. For reference in Konsole, my mappings are:
 
 ```vimscript
-map <ESC>[1;5A <C-Up>
-map <ESC>[1;5B <C-Down>
-map <ESC>[1;5D <C-Left>
-map <ESC>[1;5C <C-Right>
+map <ESC>[1;5A <M-Up>
+map <ESC>[1;5B <M-Down>
+map <ESC>[1;5D <M-Left>
+map <ESC>[1;5C <M-Right>
 ```
 
 ### Vim -> Tmux doesn't work!
